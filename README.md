@@ -7,7 +7,7 @@ Provide a pipeline to calculate instantaneous insulin sensitivity factor (ISF) a
 
 #### Background
 
-The [OpenAPS](https:// openaps.org/) project provides tools for [\#WeAreNotWaiting](#wearenotwaiting) people interested in providing a closed-loop solution to type-1 diabetics. Participants upload glucose and treatment data to [OpenHuman](https://github.com/danamlewis/OpenHumansDataTools)
+The [OpenAPS](https://openaps.org/) project provides tools for [\#WeAreNotWaiting](#wearenotwaiting) people interested in providing a closed-loop solution to type-1 diabetics. Participants upload glucose and treatment data to [OpenHuman](https://github.com/danamlewis/OpenHumansDataTools)
 
 This plot is representative of glucose and treatments over a 3 day period for an individual on standard continuous glucose monitor + insulin pump combo treatment.
 
