@@ -7,7 +7,7 @@ Provide a pipeline to calculate instantaneous insulin sensitivity factor (ISF) a
 
 #### Background
 
-The [OpenAPS](https://openaps.org/) project provides tools for [\#WeAreNotWaiting](https://twitter.com/search?q=%23wearenotwaiting) people interested in providing a closed-loop solution to type-1 diabetics. Participants upload glucose and treatment data to [OpenHuman](https://github.com/danamlewis/OpenHumansDataTools)
+The [OpenAPS](https://openaps.org/) project provides tools for [\#WeAreNotWaiting](https://twitter.com/search?q=%23wearenotwaiting) people interested in providing a closed-loop solution to type-1 diabetics. Participants upload glucose and treatment data to [OpenHuman](https://github.com/danamlewis/OpenHumansDataTools).
 
 This plot is representative of glucose and treatments over a 3 day period for an individual on standard continuous glucose monitor + insulin pump combo treatment.
 
@@ -17,18 +17,22 @@ We note that there are [many factors](https://diatribe.org/42factors) that affec
 
 #### Back-of-napkin design
 
-Independent variables: 
+Parameters: 
 
- 1. Insulin 1/2-life (lambda): model with simple exponential decay, from which we can calculate *Insulin On Board* (IOB) for any point in time
- 2. Blood glucose ranges: e.g. 32 to 384 by 32 (note that we may need to pull in earlier treatment data to calculate IOB)
+- Insulin 1/2-life (lambda): model with simple exponential decay, from which we can calculate *Insulin On Board* (IOB) for any point in time
+- Blood glucose ranges: e.g. `32 to 384 by 32` or using quantiles 
+- (Optional) time-bound (t): Only sample data across a trailing range of values
  
-Expected output:
+Features:
 
- 1. Point-in-time ISF estimates, displayed per range with population stats
+- IOB (calculated)
+- Blood glucose value (observed)
  
-Stretch goal:
+Output Label:
 
- 1. Segmentation analysis... (We lack labels for important known features like sex, weight, insulin-type, etc. But if we can demonstrate strong classification, it may be useful to request it from the community.) 
+- Point-in-time ISF estimates, with individual and population stats
+ 
+Note: We lack data for important relevant features like sex, weight, insulin-type, etc. 
 
 ##### Inputs per individual: 
 
@@ -63,3 +67,21 @@ Stretch goal:
      "eventType": "Temp Basal", "absolute": 0.275
  }
 ```
+
+##### Pseudo-algo
+
+- Pre-processing
+  - Convert JSON to [JSON Lines](http://jsonlines.org/)
+  - Pull person identifier (personId) off of the filesystem and prepend each record
+  - Store as Parquet or ORC
+- Processing
+  - Load *entries* from FS (orderBy dateString)
+  - Load *treatments* from FS (orderBy timestamp)
+  - Join by personId
+  - Filter for persons with insignificant datasets
+  - create Estimator to map IOB withColumn (given t and range)
+  - (optional) cache or persist to disk
+  - Bucketize by range - keeping in mind we may later need: {trailing data, out of range data}
+  - Linear or isotonic regression across ranges (per person and population-wide)
+- Output to SciPy, sciplot, ...
+ 
